@@ -1,0 +1,11 @@
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+/sourcemap.json
+src/Shared/Network/Client.luau
+src/Shared/Network/Server.luau
+
+/TemplatePackage
+/Packages
+/ServerPackages
+/.vscode/settings.json

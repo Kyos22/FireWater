@@ -1,0 +1,56 @@
+{
+	"class": {
+		"prefix": "class",
+		"isFileTemplate": true,
+		"body": "\r\nlocal module = {}\r\nmodule.constructors = {}\r\nmodule.methods = {}\r\nmodule.metatable = { __index = module.methods }\r\n\r\n--services\r\n\r\n--modules\r\n\r\n--refs\r\n\r\n--constants\r\n\r\n--variable\r\n\r\nfunction module.constructors.new()\r\n\tlocal self = setmetatable({}, module.metatable)\r\n\r\n\t-- public properties\r\n\tself.Part = nil\r\n\t\r\n\t-- private field\r\n\ttype field = {\r\n\t\ttasks: {[string]: thread},\r\n\t\tconnections: {[string]: RBXScriptConnection}\r\n\t}\r\n\tlocal _private: field = {\r\n\t\ttasks = {},\r\n\t\tconnections = {}\r\n\t}\r\n\tself._private = _private\r\n\t\r\n\treturn self\r\nend\r\n--private function\r\n\r\n--properties\r\n\r\n--class function\r\nfunction module.methods.Initialize(self: Type)\r\n\t\r\nend\r\n\r\nfunction module.methods.Destroy(self: Type)\r\n\tlocal _p = self._private\r\n\tfor _,task_ in pairs(_p.tasks) do\r\n\t\tif coroutine.status(task_) == \"suspended\" then\r\n\t\t\ttask.cancel(task_)\r\n\t\telse\r\n\t\t\ttask.defer(function()\r\n\t\t\t\ttask.cancel(task_)\r\n\t\t\tend)\r\n\t\tend\r\n\tend\r\n\tfor _,conn in pairs(_p.connections) do\r\n\t\tconn:Disconnect()\r\n\tend\r\n\ttable.clear(self)\r\nend\r\nexport type Type = typeof(module.constructors.new(table.unpack(...)))\r\n\r\nreturn module.constructors",
+		"description": "class"
+	},
+	"super": {
+		"prefix": "super",
+		"isFileTemplate": true,
+		"body": "local module = {}\r\nmodule.constructors = {}\r\nmodule.methods = {}\r\nmodule.metatable = {__index = module.methods}\r\n--services\r\n\r\n--modules\r\n\r\n--refs\r\n\r\n--constant\r\n\r\n--variables\r\n\r\n--constructor\r\nexport type Config = {\r\n\tPart1: BasePart\r\n}\r\nlocal function prototype(self,config: Config)\r\n\t-- public properties\r\n\tself.Part1 = config.Part1\r\n\r\n\t-- private field\r\n\ttype field = {\r\n\t\ttasks: {[string]: thread},\r\n\t\tconnections: {[string]: RBXScriptConnection}\r\n\t}\r\n\tlocal _private = {\r\n\t\ttasks = {},\r\n\t\tconnections = {}\r\n\t} :: field\r\n\tself._private = _private\r\n\r\n\treturn self\r\nend\r\n--private functions\r\n\r\n--properties\r\nmodule.constructors.metatable = module.metatable\r\nmodule.constructors.methods = module.methods\r\nmodule.constructors.private = {\r\n}\r\n--module\r\nfunction module.constructors.new(config: Config)\r\n\tlocal self = setmetatable(prototype({},config), module.metatable)\r\n\r\n\treturn self :: Type\r\nend\r\n\r\nfunction module.methods.Initialize(self: Type)\r\n\r\nend\r\n\r\nfunction module.methods.Destroy(self: Type)\r\n\tlocal _p = self._private\r\n\tfor _,task_ in pairs(_p.tasks) do\r\n\t\tif coroutine.status(task_) == \"suspended\" then\r\n\t\t\ttask.cancel(task_)\r\n\t\telse\r\n\t\t\ttask.defer(function()\r\n\t\t\t\ttask.cancel(task_)\r\n\t\t\tend)\r\n\t\tend\r\n\tend\r\n\tfor _,conn in pairs(_p.connections) do\r\n\t\tconn:Disconnect()\r\n\tend\r\n\t--if we use table.clear(self) there gonna be some error in lua typing suggestion\r\n    local temp = self :: {}\r\n\tfor k in pairs(temp) do\r\n        temp[k] = nil\r\n\tend\r\nend\r\nfunction module.methods.DoABC(self: Type)\r\n\tprint(\"Super DoABC\")\r\nend\r\n\r\nexport type Type = typeof(prototype(...)) & typeof(module.methods)\r\n\r\nreturn module.constructors",
+		"description": "super"
+	},
+	"sub": {
+		"prefix": "sub",
+		"isFileTemplate": true,
+		"body": "local super = require(script.Parent)\r\nlocal module = {}\r\nmodule.constructors = {}\r\nmodule.methods = {}\r\nmodule.metatable = {__index = module.methods}\r\nsetmetatable(module.methods,super.metatable)\r\n--services\r\n\r\n--modules\r\n\r\n--refs\r\n\r\n--constant\r\n\r\n--variables\r\n\r\n--constructor\r\nexport type Config = super.Config & {\r\n\tPart2: BasePart\r\n}\r\nlocal function prototype(self, config: Config)\r\n\tself.Part2 = config.Part2\r\n\treturn self\r\nend\r\n--private functions\r\n\r\n--properties\r\nmodule.constructors.metatable = module.metatable\r\nmodule.constructors.methods = module.methods\r\nmodule.constructors.private = {\r\n}\r\n--module\r\nfunction module.constructors.new(config: Config) \r\n\tlocal self = setmetatable(super.new(config), module.metatable)\r\n\tself = prototype(self,config)\r\n\treturn self :: Type\r\nend\r\nfunction module.methods.DoABC(self: Type)\r\n\tsuper.methods.DoABC(self)\r\n\tprint(\"Overwrite DoABC\")\r\nend\r\n\r\nexport type Type = super.Type & typeof(prototype(...)) & typeof(module.methods)\r\n\r\nreturn module.constructors",
+		"description": "desc"
+	},
+	"library": {
+		"prefix": "library",
+		"isFileTemplate": true,
+		"body": "local module = {}\r\n--constant & enum\r\n\r\n--apis\r\nfunction module.GetAllABC()\r\n\t\r\nend\r\n--deep freeze everything\r\nlocal function deepFreeze(tbl)\r\n\ttable.freeze(tbl)\r\n\tfor _, v in pairs(tbl) do\r\n\t\tif type(v) == \"table\" and not table.isfrozen(v) then\r\n\t\t\tdeepFreeze(v)\r\n\t\tend\r\n\tend\r\nend\r\ndeepFreeze(module)\r\n\r\nreturn module\r\n",
+		"description": "library"
+	},
+	"system_client": {
+		"prefix": "system_client",
+		"isFileTemplate": true,
+		"body": "--!strict\r\n--service\r\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\r\n--refs\r\n--modules\r\nlocal Yumi = require(ReplicatedStorage.Shared.Core.Yumi)\r\n\r\n--\r\nexport type APIsType = {}\r\n\r\nlocal module = {} :: APIsType & Yumi.System\r\n\r\n--yumi\r\n\r\n--apis\r\n\r\nreturn module\r\n",
+		"description": "system_client"
+	},
+	"system_server": {
+		"prefix": "system_server",
+		"isFileTemplate": true,
+		"body": "--!strict\r\n--service\r\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\r\n--refs\r\n--modules\r\nlocal Yumi = require(ReplicatedStorage.Shared.Core.Yumi)\r\n\r\n--\r\nexport type APIsType = {}\r\n\r\nlocal module = {} :: APIsType & Yumi.System\r\n\r\n--yumi\r\n\r\n--apis\r\n\r\nreturn module\r\n",
+		"description": "system_server"
+	},
+	"observer_client": {
+		"prefix": "observer_client",
+		"isFileTemplate": true,
+		"body": "--!strict\r\n--services\r\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\r\n--modules\r\nlocal Yumi = require(ReplicatedStorage.Shared.Core.Yumi)\r\nlocal SignalModule = require(ReplicatedStorage:WaitForChild(\"Packages\"):WaitForChild(\"Signal\"))\r\n--type\r\ntype Signal = typeof(SignalModule.new())\r\n--constants\r\nlocal Event = {\r\n\tPlayerTouched = \"PlayerTouched\",\r\n}\r\n--type\r\nexport type PlayerTouchedEventArgs = {\r\n\tOtherPart: BasePart\r\n}\r\n--variable\r\nlocal eventCache: {\r\n\t[string]: Signal\r\n} = {}\r\n\r\n--\r\nexport type Type = {\r\n\tEvent: typeof(Event)\r\n} & Yumi.Observer\r\nlocal module: Type = {\r\n\t_Setup = function() end,\r\n\r\n\tEvent = Event,\r\n\tListenEvent = function() return nil end,\r\n\tCallEvent = function() end,\t\r\n\t\t\r\n\t_Extensions = {},\r\n}\r\n\r\ndo --init\r\n\ttable.freeze(Event)\t\r\n\tfor _,event in pairs(Event) do\r\n\t\teventCache[event] = SignalModule.new()\r\n\tend\r\nend\r\n\r\n--yumi\r\nmodule._Setup = function()\r\n\r\nend\r\nmodule.ListenEvent = function(event: string, callback: any)\r\n\tif not eventCache[event] or not callback then\r\n\t\treturn nil\r\n\tend\r\n\tif typeof(callback) ~= \"function\" then\r\n\t\treturn nil\r\n\tend\t\r\n\tlocal conn = eventCache[event]:Connect(callback)\r\n\treturn conn\r\nend\r\nmodule.CallEvent = function(event: string, args: any, isDefered: boolean?)\r\n\tif not eventCache[event]then\r\n\t\treturn nil\r\n\tend\r\n\tif isDefered then\r\n\t\teventCache[event]:FireDeferred(args)\r\n\telse\r\n\t\teventCache[event]:Fire(args)\r\n\tend\r\nend\r\nreturn module\r\n",
+		"description": "observer_client"
+	},
+	"observer_server": {
+		"prefix": "observer_server",
+		"isFileTemplate": true,
+		"body": "--!strict\r\n--services\r\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\r\n--modules\r\nlocal Yumi = require(ReplicatedStorage.Shared.Core.Yumi)\r\nlocal SignalModule = require(ReplicatedStorage.Packages.Signal)\r\n--type\r\ntype Signal = typeof(SignalModule.new())\r\n--constants\r\nlocal Event = {\r\n\tPlayerTouched = \"PlayerTouched\",\r\n}\r\n--type\r\nexport type PlayerTouchedEventArgs = {\r\n\tOtherPart: BasePart\r\n}\r\n--variable\r\nlocal eventCache: {\r\n\t[string]: Signal\r\n} = {}\r\n\r\n--\r\nexport type Type = {\r\n\tEvent: typeof(Event)\r\n} & Yumi.Observer\r\nlocal module: Type = {\r\n\t_Setup = function() end,\r\n\r\n\tEvent = Event,\r\n\tListenEvent = function() return nil end,\r\n\tCallEvent = function() end,\t\r\n\t\t\r\n\t_Extensions = {},\r\n}\r\n\r\ndo --init\r\n\ttable.freeze(Event)\t\r\n\tfor _,event in pairs(Event) do\r\n\t\teventCache[event] = SignalModule.new()\r\n\tend\r\nend\r\n\r\n--yumi\r\nmodule._Setup = function()\r\n\r\nend\r\nmodule.ListenEvent = function(event: string, callback: any)\r\n\tif not eventCache[event] or not callback then\r\n\t\treturn nil\r\n\tend\r\n\tif typeof(callback) ~= \"function\" then\r\n\t\treturn nil\r\n\tend\t\r\n\tlocal conn = eventCache[event]:Connect(callback)\r\n\treturn conn\r\nend\r\nmodule.CallEvent = function(event: string, args: any, isDefered: boolean?)\r\n\tif not eventCache[event]then\r\n\t\treturn nil\r\n\tend\r\n\tif isDefered then\r\n\t\teventCache[event]:FireDeferred(args)\r\n\telse\r\n\t\teventCache[event]:Fire(args)\r\n\tend\r\nend\r\nreturn module\r\n",
+		"description": "observer_server"
+	},
+	"ui_class": {
+		"prefix": "ui_class",
+		"isFileTemplate": true,
+		"body": "\r\nlocal module = {}\r\nmodule.constructors = {}\r\nmodule.methods = {}\r\nmodule.metatable = { __index = module.methods }\r\n\r\n--services\r\n\r\n--modules\r\n\r\n--refs\r\n\r\n--constants\r\n\r\n--variable\r\n\r\nfunction module.constructors.new()\r\n\tlocal self = setmetatable({}, module.metatable)\r\n\r\n\t-- public properties\r\n\tself.Part = nil\r\n\t\r\n\t-- private field\r\n\ttype field = {\r\n\t\ttasks: {[string]: thread},\r\n\t\tconnections: {[string]: RBXScriptConnection}\r\n\t}\r\n\tlocal _private: field = {\r\n\t\ttasks = {},\r\n\t\tconnections = {}\r\n\t}\r\n\tself._private = _private\r\n\t\r\n    self:Initialize()\r\n    \r\n\treturn self\r\nend\r\n--private function\r\n\r\n--properties\r\n\r\n--class function\r\nfunction module.methods.Initialize(self: Type)\r\n\t\r\nend\r\n\r\nfunction module.methods.Destroy(self: Type)\r\n\tlocal _p = self._private\r\n\tfor _,task_ in pairs(_p.tasks) do\r\n\t\tif coroutine.status(task_) == \"suspended\" then\r\n\t\t\ttask.cancel(task_)\r\n\t\telse\r\n\t\t\ttask.defer(function()\r\n\t\t\t\ttask.cancel(task_)\r\n\t\t\tend)\r\n\t\tend\r\n\tend\r\n\tfor _,conn in pairs(_p.connections) do\r\n\t\tconn:Disconnect()\r\n\tend\r\n\ttable.clear(self)\r\nend\r\n\r\nfunction module.methods.Open(self: Type)\r\n    \r\nend\r\nfunction module.methods.Close(self: Type)\r\n    \r\nend\r\nexport type Type = typeof(module.constructors.new(table.unpack(...)))\r\n\r\nreturn module.constructors",
+		"description": "ui_class"
+	}
+}
