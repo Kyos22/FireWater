@@ -13,6 +13,17 @@ local Template = {
 	Balance = {
 		Medals = 0,
 	},
+	Unlock = {
+		Worlds = {
+			[1] = {
+				MapsUnlock = {
+					[1] = true,
+				}
+			},
+		}
+		
+	},
+	CurrentWorld = 1,
 
 }
 --type
@@ -22,7 +33,16 @@ export type Profile = {
 	Balance: {
 		Medals: number,
 	},
-	
+	Unlock: {
+		Worlds: {
+			[number]: {
+				MapsUnlock: {
+					[number]: boolean,
+				}
+			}
+		}
+	},
+	CurrentWorld : number,
 }
 
 local module = {}

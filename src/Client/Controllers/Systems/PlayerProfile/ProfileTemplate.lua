@@ -14,7 +14,16 @@ export type Profile = {
 	Balance: {
 		Medals: number,
 	},
-	
+	Unlock: {
+		Worlds: {
+			[number]: {
+				MapsUnlock: {
+					[number]: boolean,
+				}
+			}
+		}
+	},
+	CurrentWorld : number,
 	
 }
 
@@ -25,6 +34,17 @@ local Template: Profile = {
 	Balance = {
 		Medals = 0,
 	},
+	Unlock = {
+		Worlds = {
+			[1] = {
+				MapsUnlock = {
+					[1] = true,
+				}
+			},
+		}
+		
+	},
+	CurrentWorld = 1,
 	
 }
 

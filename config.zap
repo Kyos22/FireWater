@@ -18,3 +18,17 @@ funct Get_Player_Data = {
     rets: (unknown)
 }
 
+---- Match
+event Match_Start = {
+    from: Server,
+	type: Reliable,
+	call: ManyAsync,
+	data: (unknown)
+}
+event Open_Select_Map = {
+    from: Server,
+	type: Reliable,
+	call: ManyAsync,
+	data: (boolean)
+} 
+

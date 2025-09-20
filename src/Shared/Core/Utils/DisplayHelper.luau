@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 
 --// References
-local DefaultSource = ReplicatedStorage.Assets.UI
+local DefaultSource = ReplicatedStorage.Shared.Assets.UI
 
 --// Public Functions
 local module = {}
