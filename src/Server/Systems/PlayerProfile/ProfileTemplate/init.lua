@@ -13,14 +13,7 @@ local Template = {
 	Balance = {
 		Medals = 0,
 	},
-	
 
-		
-	-- Inventory = {
-	-- 	Weapons = {
-	-- 		Owned = {},
-	-- 	},
-	-- },
 }
 --type
 export type Profile = {
