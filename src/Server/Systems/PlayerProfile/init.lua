@@ -15,7 +15,7 @@ local ProfileTemplate = require(script.ProfileTemplate)
 local Server = require(ReplicatedStorage.Shared.Network.Server)
 --constants
 local DATASTORE_VERSION = 1
-local SAVED = false
+local SAVED = true
 --variables
 local playerStore = ProfileStore.New("PlayerStore" .. tostring(DATASTORE_VERSION), ProfileTemplate.Template)
 local profileCache: { [Player]: typeof(playerStore:StartSessionAsync(table.unpack(...))) } = {}

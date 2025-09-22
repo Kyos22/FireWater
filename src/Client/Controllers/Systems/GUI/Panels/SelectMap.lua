@@ -128,6 +128,7 @@ function module.methods.Load(self: Type, world: number)
 			card:WaitForChild("Overlay").Visible = false
 			Button.Button(card, _mapUnlocked[k] or false):Connect(function()
 				print("button")
+				Client.Select_Map.Call(world, k)
 			end)
 		
 

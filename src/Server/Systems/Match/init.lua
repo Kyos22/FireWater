@@ -20,8 +20,14 @@ local ProfileTemplate = require(ServerScriptService.Systems.PlayerProfile.Profil
 
 export type APIsType = {
     waitingMatch: {
+        -- [string] : {
+        --     [Player] : boolean
+        -- }
         [string] : {
-            [Player] : boolean
+            Players: {
+                [Player] : boolean
+            },
+            SelectMap: number 
         }
     },
     tasks : {[string]: thread},
@@ -83,6 +89,11 @@ module._Start = function()
         module:Destroy(player)
     end)
 
+    connections["API_Select_Map"] =
+        Server.Select_Map.SetCallback(function(player:Player, world: number, map: number)
+            return module:SelectMap(player,world,map)
+        end)
+
     --init all zone
     -- module:CheckZone()
     module:CreateRoom()
@@ -124,7 +135,7 @@ local function GetRoom(zoneInstance,zone) : string
 end
 
 module.Teleport = function(self:APIsType, roomName: string)
-    if self.waitingMatch[roomName] and #self.waitingMatch[roomName] == 2 then
+    if self.waitingMatch[roomName] and #self.waitingMatch[roomName].Players == 2 then
         -- zap handle
         -- Server.
         task.wait(5)
@@ -149,18 +160,18 @@ module.CheckZone = function(self:APIsType,player:Player)
                     local room = GetRoom(zoneInstance,zone)
                     if self.waitingMatch[room] then
                         print("count",self.waitingMatch[room])
-                        if not next(self.waitingMatch[room]) then
-                            self.waitingMatch[room][player] = true
+                        if not next(self.waitingMatch[room].Players) then
+                            self.waitingMatch[room].Players[player] = true
                             Server.Open_Select_Map.Fire(player,true)
             
-                        elseif #self.waitingMatch[room] < 2 then
+                        elseif #self.waitingMatch[room].Players < 2 then
                             self.waitingMatch[room][player] = true
 
                             local zoneParent = zoneInstance.Parent :: Instance 
-                            local Box = zoneParent:FindFirstChild("Box") :: Model
-                            local PrimaryBox = Box.PrimaryPart :: Part
+                            -- local Box = zoneParent:FindFirstChild("Box") :: Model
+                            -- local PrimaryBox = Box.PrimaryPart :: Part
                             -- TweenService:Create(PrimaryBox,TweenInfo.new(1,Enum.EasingStyle.Linear),{Position = Vector3.new(PrimaryBox.Position.X,16.2,PrimaryBox.Position.Z)}):Play()
-                        elseif self.waitingMatch[room] and #self.waitingMatch[room] == 2 then
+                        elseif self.waitingMatch[room].Players and #self.waitingMatch[room].Players == 2 then
                             task.wait(5)
                         end
                     end
@@ -171,8 +182,8 @@ module.CheckZone = function(self:APIsType,player:Player)
                     print("leave", player)
                     local room = GetRoom(zoneInstance,zone)
                     if self.waitingMatch[room] then
-                        if self.waitingMatch[room][player] then
-                            self.waitingMatch[room][player] = nil
+                        if self.waitingMatch[room].Players[player] then
+                            self.waitingMatch[room].Players[player] = nil
                         else
                             warn("full not found")
                         end
@@ -198,7 +209,10 @@ module.CreateRoom = function(self:APIsType)
         print("lobby",lobby)
         local matchZones = lobby:FindFirstChild("MatchZone") :: Folder
         for _,zone in pairs(matchZones:GetChildren()) do
-            self.waitingMatch["World".. k.Name .. "_" .. zone.Name ] = {}
+            self.waitingMatch["World".. k.Name .. "_" .. zone.Name ] = {
+                Players = {},
+                SelectMap = 0
+            }
             print("zone",zone)
             print("zone",zone.Name)
         end
@@ -222,6 +236,21 @@ end
 --yumi
 
 --apis
+
+module.SelectMap = function(self:APIsType,player:Player, world: number, map: number): boolean
+    if typeof(world) == "number" and typeof(map) == "number" and world > 0 and map > 0 then
+        for roomName,roomData in pairs(module.waitingMatch) do
+            -- print("room haha",roomData)
+            if roomData.Players[player] then
+                self.waitingMatch[tostring(roomName)].SelectMap = map
+            end
+        end
+        print("result",module.waitingMatch)
+        return true
+    else
+        return false
+    end
+end
 
 return module
 

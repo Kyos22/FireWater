@@ -31,4 +31,8 @@ event Open_Select_Map = {
 	call: ManyAsync,
 	data: (boolean)
 } 
-
+funct Select_Map = {
+	call: Async,
+    args: (world:u8,map: u8),
+    rets: (boolean)
+}
