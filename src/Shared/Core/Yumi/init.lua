@@ -1,34 +1,34 @@
 --!strict
---services
+--// Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
---modules
+local RunService = game:GetService("RunService")
+--// Modules
 
 local Signal = require(ReplicatedStorage.Packages.Signal)
-local Promise = require(ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Promise"))
-local FFlag = require(script:WaitForChild("FFlag"))
-
---types
+local Promise = require(ReplicatedStorage.Packages.Promise)
+local Features = require(script:WaitForChild("Features"))
+--// constants
+local SERVER = RunService:IsServer()
+--// Types
 type Signal = typeof(Signal.new())
 type Connection = typeof(Signal.new():Connect(table.unpack(...)))
 type Promise = typeof(Promise.new(table.unpack(...)))
 
 export type System = {
 	_Name: string?,
-	_Setup: (System) -> (),
-	_Start: (System) -> (),
+	_Setup: (System, Yumi) -> (),
+	_Start: (System, Yumi) -> (),
 	_Priority: number?,
-	[any]: any,
 }
 
 export type Observer = {
 	_Name: string?,
-	_Setup: (System) -> (),
+	_Setup: (Observer, Yumi) -> (),
 	_Priority: number?,
-	[any]: any,
 
 	Event: { [string]: string },
-	ListenEvent: (event: string, callback: (...any) -> ()) -> Connection?,
-	CallEvent: (event: string, args: { [any]: any }, isDefered: boolean?) -> (),
+	Subscribe: (event: string, callback: (...any) -> ()) -> Connection?,
+	Fire: (event: string, args: { [any]: any }, isDefered: boolean?) -> (),
 }
 
 --constants
@@ -56,7 +56,7 @@ Yumi.isLoaded = false
 local _Started: boolean = false
 local _Completed: boolean = false
 local _OnComplete: BindableEvent = Instance.new("BindableEvent")
-local _ShouldPrintLog: boolean = FFlag.Yumi["PRINT LOG"]
+local _ShouldPrintLog: boolean = Features.Yumi["PrintLog"]
 
 function Yumi:Add(storageType: "Systems" | "Observers", storage: Folder | Model, deep: boolean?)
 	if _Started then
@@ -70,39 +70,97 @@ function Yumi:Add(storageType: "Systems" | "Observers", storage: Folder | Model,
 		end
 
 		if storageType == "Systems" then
-			local shouldEnable = FFlag.System[object.Name]
-			if shouldEnable then
+			local group = SERVER and Features.Systems.Server or Features.Systems.Client
+			local featureGroup = group[object.Name]
+			local valid = false
+			if not featureGroup then
+				warn("Cannot add system, feature is not defined:", object.Name)
+			elseif featureGroup.Enabled == false then
 				warn("Cannot add system, feature is disabled:", object.Name)
+			elseif self._Systems[object.Name] then
+				warn("Cannot add system, feature already exist:", object.Name)
+			else
+				valid = true
+			end
+
+			if not valid then
 				continue
 			end
 
-			if self._Systems[object.Name] then
-				warn("Cannot add system, system already exist:", object.Name)
-				continue
-			end
+			do
+				local requireTime = os.clock()
+				local stopClock = false
 
-			local system = require(object) :: System
-			if not system._Name then
-				system._Name = object.Name
+				local requireThread = task.spawn(function()
+					local system = require(object) :: System
+					if not system._Name then
+						system._Name = object.Name
+					end
+					system._Priority = featureGroup.Priority or DEFAULT_PRIORITY
+					self._Systems[object.Name] = system
+
+					stopClock = true
+				end)
+
+				while not stopClock do
+					local current = os.clock()
+					if current - requireTime > 30 then
+						warn("System", object.Name, "is taking too long to load, aborting...")
+						break
+					end
+					task.wait()
+				end
+
+				task.defer(function()
+					task.cancel(requireThread)
+				end)
 			end
-			self._Systems[object.Name] = system
 		elseif storageType == "Observers" then
-			local shouldEnable = FFlag.Observer[object.Name]
-			if shouldEnable then
+			local group = SERVER and Features.Observers.Server or Features.Observers.Client
+			local featureGroup = group[object.Name]
+			local valid = false
+			if not featureGroup then
+				warn("Cannot add observer, feature is not defined:", object.Name)
+			elseif featureGroup.Enabled == false then
 				warn("Cannot add observer, feature is disabled:", object.Name)
+			elseif self._Observers[object.Name] then
+				warn("Cannot add observer, feature already exist:", object.Name)
+			else
+				valid = true
+			end
+
+			if not valid then
 				continue
 			end
 
-			if self._Observers[object.Name] then
-				warn("Cannot add observer, observer already exist:", object.Name)
-				continue
-			end
+			do
+				local requireTime = os.clock()
+				local stopClock = false
 
-			local observer = require(object) :: Observer
-			if not observer._Name then
-				observer._Name = object.Name
+				local requireThread = task.spawn(function()
+					local observer = require(object) :: Observer
+					if not observer._Name then
+						observer._Name = object.Name
+					end
+					observer._Priority = featureGroup.Priority or DEFAULT_PRIORITY
+					self._Observers[object.Name] = observer
+
+					stopClock = true
+				end)
+
+				while not stopClock do
+					local current = os.clock()
+					if current - requireTime > 30 then
+						warn("Observer", object.Name, "is taking too long to load, aborting...")
+						break
+					end
+					task.wait()
+				end
+
+				task.defer(function()
+					task.cancel(requireThread)
+				end)
 			end
-			self._Observers[object.Name] = observer
 		end
 	end
 end
@@ -114,7 +172,7 @@ function Yumi:Start(): Promise
 	_Started = true
 
 	local observerList: { { Name: string, Observer: Observer, Priority: number } } = {}
-	local systemList: { { Name: string, System: Observer, Priority: number } } = {}
+	local systemList: { { Name: string, System: System, Priority: number } } = {}
 
 	do --sort
 		--observers
@@ -122,7 +180,7 @@ function Yumi:Start(): Promise
 			table.insert(observerList, {
 				Name = name,
 				Observer = observer,
-				Priority = observer._Priority or DEFAULT_PRIORITY,
+				Priority = observer._Priority :: number,
 			})
 		end
 		table.sort(observerList, function(a, b)
@@ -134,7 +192,7 @@ function Yumi:Start(): Promise
 			table.insert(systemList, {
 				Name = name,
 				System = system,
-				Priority = system._Priority or DEFAULT_PRIORITY,
+				Priority = system._Priority :: number,
 			})
 		end
 		table.sort(systemList, function(a, b)
@@ -154,7 +212,7 @@ function Yumi:Start(): Promise
 						print(`Setting up observer {observer._Name}`)
 					end
 					local success, result = pcall(function()
-						observer:_Setup()
+						observer:_Setup(Yumi)
 					end)
 					if not success then
 						task.spawn(function()
@@ -174,10 +232,10 @@ function Yumi:Start(): Promise
 				if typeof(system._Setup) == "function" then
 					debug.setmemorycategory(name)
 					if _ShouldPrintLog then
-						print(`Setting up system {system._Name}`)
+						-- print(`Setting up system {system._Name}`)
 					end
 					local success, result = pcall(function()
-						system:_Setup()
+						system:_Setup(Yumi)
 					end)
 					if not success then
 						task.spawn(function()
@@ -188,7 +246,7 @@ function Yumi:Start(): Promise
 			end
 			SetupResolve()
 		end):Await()
-		
+
 		Resolve()
 	end):Then(function()
 		for _, data in ipairs(systemList) do
@@ -197,9 +255,16 @@ function Yumi:Start(): Promise
 			if typeof(system._Start) == "function" then
 				task.spawn(function()
 					if _ShouldPrintLog then
-						print(`Starting up system {name}`)
+						-- print(`Starting up system {name}`)
 					end
-					system:_Start()
+					local success, result = pcall(function()
+						system:_Start(Yumi)
+					end)
+					if not success then
+						task.spawn(function()
+							error(result)
+						end)
+					end
 				end)
 			end
 		end

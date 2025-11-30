@@ -4,16 +4,21 @@
     "$className": "DataModel",
     "Workspace": {
       "$className": "Workspace",
-      "$properties": {
-        "ModelStreamingBehavior": {
-          "Enum": 2
-        }
+      "$ignoreUnknownInstances": true,
+      "Slots": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true 
       },
-      "$ignoreUnknownInstances": true
+      "Visuals": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true 
+      },
+      "Serve": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true 
+      }
     },
-    "ReplicatedFirst": {
-      "$path": "src/Client/Preload"
-    },
+    
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/Shared",
@@ -28,6 +33,10 @@
       },
       "Packages": {
         "$path": "Packages"
+      },
+      "Runtime": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true 
       }
     },
     "ServerScriptService": {
@@ -36,22 +45,16 @@
         "$path": "ServerPackages"
       }
     },
+    "ReplicatedFirst": {
+      "$path": "src/Client/Preload",
+      "$ignoreUnknownInstances": true
+    },
     "StarterPlayer": {
-      "$properties": {
-        "EnableMouseLockOption": false
-      },
       "StarterPlayerScripts": {
-        "$className": "StarterPlayerScripts",
-        "$path": "src/Client/Player",
-        "$ignoreUnknownInstances": true
+        "$path": "src/Client/Player"
       },
       "StarterCharacterScripts": {
         "$path": "src/Client/Character"
-      }
-    },
-    "Players": {
-      "$properties": {
-        "CharacterAutoLoads": true
       }
     }
   }

@@ -5,16 +5,19 @@ module.methods = {}
 module.metatable = { __index = module.methods }
 
 --services
-
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 --modules
 
 --events
 
---constants
+--constant
 
 --type
 
 --variable
+local PoolingFolder = Instance.new("Folder")
+PoolingFolder.Name = "ObjectPooling"
+PoolingFolder.Parent = ReplicatedStorage.Runtime
 
 function module.constructors.new(template: Instance, size: number?)
 	local self = setmetatable({}, module.metatable)
@@ -70,7 +73,7 @@ function module.methods.Initialize(self: Type)
 	if size then
 		for i=1,size,1 do
 			local obj = template:Clone()
-			obj.Parent = nil 
+			obj.Parent = PoolingFolder 
 			table.insert(self.pool, obj)
 		end
 	end
@@ -80,14 +83,16 @@ function module.methods.Initialize(self: Type)
 end
 function module.methods.Get(self:Type)
 	if #self.pool > 0 then
-
 		return table.remove(self.pool)
 	else
 		return self.template:Clone()
 	end
 end
 function module.methods.Return(self:Type, obj: Instance)
-	obj.Parent = nil
+	if obj.Parent == PoolingFolder then
+		return
+	end
+	obj.Parent = PoolingFolder
 	table.insert(self.pool, obj)
 end
 function module.methods.Clear(self:Type)

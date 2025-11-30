@@ -129,6 +129,23 @@ function CloneTable(t: { [any]: any }, deep: boolean?)
 	return DeepCopy(t)
 end
 
+function FreezeTable(t: { [any]: any }, deep: boolean?)
+	if not deep then
+		table.freeze(t)
+		return
+	end
+
+	if not table.isfrozen(t) then
+		table.freeze(t)
+	end
+
+	for _, v in pairs(t) do
+		if type(v) == "table" and not table.isfrozen(v) then
+			FreezeTable(v)
+		end
+	end
+end
+
 function KeysMatch(table1, table2, key)
 	if table2[key] == nil then
 		return
@@ -332,36 +349,148 @@ local function TweenModelSize(
 	end
 end
 
-local function WrapDebounce(self: Type, func)
-    return function(...)
-        if self.Debounce then return end
-        self.Debounce = true
-        func(...)
-        self.Debounce = false
-    end
+local function FormatNumberWithCommas(num: number): string
+	local str = tostring(math.floor(num)) -- Ensure it's an integer
+	local formatted = str:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	if formatted:sub(1, 1) == "," then
+		formatted = formatted:sub(2)
+	end
+	return formatted
+end
+
+local function FormatTime(seconds: number): string
+	local hours = math.floor(seconds / 3600)
+	local minutes = math.floor((seconds % 3600) / 60)
+	local secs = math.floor(seconds % 60)
+
+	return string.format("%02d:%02d:%02d", hours, minutes, secs)
+end
+
+local function RenderLabel(frame: Frame, text: string?): boolean
+	local back = frame:FindFirstChild("Back") :: TextLabel
+	if not back then
+		warn(`Back is missing from Label: {frame:GetFullName()}`)
+		return false
+	end
+
+	local front = frame:FindFirstChild("Front") :: TextLabel
+	if not front then
+		warn(`Front is missing from Label: {frame:GetFullName()}`)
+		return false
+	end
+
+	back.Text = text or ""
+	front.Text = text or ""
+	return true
+end
+
+local function FadeLabel(frame: Frame, transparency: number): boolean
+	local back = frame:FindFirstChild("Back") :: TextLabel
+	if not back then
+		warn(`Back is missing from Label: {frame:GetFullName()}`)
+		return false
+	end
+
+	local front = frame:FindFirstChild("Front") :: TextLabel
+	if not front then
+		warn(`Front is missing from Label: {frame:GetFullName()}`)
+		return false
+	end
+
+	back.TextTransparency = transparency
+	front.TextTransparency = transparency
+
+	local backStroke = back:FindFirstChildOfClass("UIStroke")
+	if backStroke then
+		backStroke.Transparency = transparency
+	end
+
+	local frontStroke = front:FindFirstChildOfClass("UIStroke")
+	if frontStroke then
+		frontStroke.Transparency = transparency
+	end
+
+	return true
+end
+
+local function RenderStars(frame: Frame, amount: number?, isRating: boolean?, isDisappear: boolean?): boolean
+	local amountRating = amount or 0
+	if isRating then
+		-- Star constructor: Back & Fill
+		-- Lerp: -0.5 - 0.5
+		type starStructure = Frame & {
+			Back: ImageLabel,
+			Fill: ImageLabel & {
+				UIGradient: UIGradient
+			}
+		}
+		for i = 1, 5 do
+			local star: starStructure = frame:FindFirstChild(i)
+			if not star then
+				continue
+			end
+
+			local progress = math.clamp(amountRating - (i - 1), 0, 1)
+			local offset = Vector2.new(math.lerp(-0.5, 0.5, progress), 0)
+			star.Fill.UIGradient.Offset = offset
+		end
+	else
+		for i = 1, 5 do
+			local star = frame:FindFirstChild(i)
+			if not star then
+				continue
+			end
+
+			local isEnough = amountRating >= i
+			star.Fill.Visible = isEnough
+
+			if isDisappear then
+				star.Visible = isEnough
+			end
+		end
+	end
+end
+
+local function Now(): number
+	return DateTime.now().UnixTimestamp
 end
 
 return {
 	CountDict = CountDict,
+
 	TweenModelCFrame = TweenModelCFrame,
 	TweenModelSize = TweenModelSize,
+
 	HasProperty = HasProperty,
 	ConvertPartToProperties = ConvertPartToProperties,
 	ApplyPropertiesToPart = ApplyPropertiesToPart,
+
 	GetPrimaryPart = GetPrimaryPart,
 	GetLongestAxis = GetLongestAxis,
 	GetVolume = GetVolume,
 	GetMass = GetMass,
+
 	GetRandomPositionNearModel = require(script.RandomPosNearModel),
+
 	GetDescendantsWhichAre = GetDescendantsWhichAre,
+
 	CloneTable = CloneTable,
+	FreezeTable = FreezeTable,
 	KeysMatch = KeysMatch,
 	CheckKeys = CheckKeys,
 	AreTablesSame = AreTablesSame,
+
 	Lerp = Lerp,
 	FLoorToDecimal = FloorToDecimal,
 	FormatNumber = FormatNumber,
-	NUMBER_SUFFIXES = NUMBER_SUFFIXES,
+	FormatNumberWithCommas = FormatNumberWithCommas,
+	FormatTime = FormatTime,
 
-	WrapDebounce = WrapDebounce,
+	RenderLabel = RenderLabel,
+	FadeLabel = FadeLabel,
+	RenderStars = RenderStars,
+
+	Now = Now,
+
+	NUMBER_SUFFIXES = NUMBER_SUFFIXES,
 }

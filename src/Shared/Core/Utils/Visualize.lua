@@ -1,15 +1,5 @@
---// Services
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+--services
 local Debris = game:GetService("Debris")
-
---// References
-local Assets = ReplicatedStorage.Assets
-local BulletHoleTemplate = Assets.Visual:WaitForChild("BulletHole")
-
---// Constants
-local BULLET_HOLE_LIFETIME = 3
-
---// System
 local module = {}
 
 function module.Position(pos: Vector3, color: Color3, lifeTime: number, collisionGroup: string?)
@@ -87,24 +77,6 @@ function module.Line(
 	part.Transparency = 0.7
 	part.Parent = workspace.Terrain
 	Debris:AddItem(part, lifeTime)
-end
-function module.BulletHole(
-	position: Vector3,
-	normal: Vector3,
-	isBlood: boolean
-)
-	local bulletHole = BulletHoleTemplate:Clone()
-	bulletHole.CFrame = CFrame.new(position, position + normal) * CFrame.Angles(0, 0, math.rad(math.random(0, 360)))
-	
-	if isBlood then
-		bulletHole.Decal:Destroy()
-		bulletHole.BloodEmitter:Emit(5)
-	else
-		bulletHole.SmokeEmitter:Emit(8)
-	end
-
-	bulletHole.Parent = workspace.Visuals
-	Debris:AddItem(bulletHole, BULLET_HOLE_LIFETIME)
 end
 
 return module

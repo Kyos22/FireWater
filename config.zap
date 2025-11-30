@@ -5,6 +5,9 @@ opt write_checks = true
 opt yield_type = "future"
 opt async_lib = "require(game:GetService('ReplicatedStorage').Packages.Future)"
 
+-- INTEGRATION TESTING
+
+
 ----PlayerProfile
 event Player_Update_Profile = {
     from: Server,
@@ -12,27 +15,10 @@ event Player_Update_Profile = {
 	call: ManyAsync,
 	data: (unknown)
 }
-funct Get_Player_Data = {
-    call: Async,
-    args: (),
-    rets: (unknown)
-}
 
----- Match
-event Match_Start = {
-    from: Server,
-	type: Reliable,
-	call: ManyAsync,
-	data: (unknown)
-}
-event Open_Select_Map = {
-    from: Server,
-	type: Reliable,
-	call: ManyAsync,
-	data: (boolean)
-} 
-funct Select_Map = {
-	call: Async,
-    args: (world:u8,map: u8),
-    rets: (boolean)
+--------- profile--------------
+funct Get_Profile = {
+    call: Async,
+    args: (async: boolean?),
+    rets: (unknown)
 }

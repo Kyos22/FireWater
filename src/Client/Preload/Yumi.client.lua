@@ -2,7 +2,7 @@
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Preloader = require(script.Parent:WaitForChild("Preloader"))
+local Preloader = require(script.Parent.Preloader)
 
 ReplicatedFirst:RemoveDefaultLoadingScreen()
 
@@ -17,16 +17,16 @@ preloader:Load():Then(function()
 	if not game:IsLoaded() then
 		game.Loaded:Wait()
 	end
+
 	local deltaTime = os.clock() - startTime
 	warn("Game loaded took", deltaTime, "seconds to load", #preloader.Items, "assets.")
 
 	local Yumi = require(ReplicatedStorage.Shared.Core.Yumi)
-	local ControllerFolder = ReplicatedStorage.Controllers
-	Yumi:Add("Systems", ControllerFolder.Systems)
-	Yumi:Add("Observers", ControllerFolder.Observers)
+	Yumi:Add("Systems", ReplicatedStorage.Controllers.Systems)
 
 	Yumi:Start()
 		:Then(function()
+			preloader.LoadedProgress = 1
 			warn("⭕| Yumi Client loaded!")
 		end)
 		:Catch(warn)

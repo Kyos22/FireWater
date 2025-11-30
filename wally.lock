@@ -5,7 +5,7 @@ registry = "test"
 [[package]]
 name = "admin/knit-tutorial"
 version = "0.1.0"
-dependencies = [["Fusion", "elttob/fusion@0.3.0"], ["Future", "red-blox/future@1.0.1"], ["ObjectCache", "pyseph/objectcache@1.4.6"], ["Octo", "sleitnick/octo-tree@0.3.1"], ["Promise", "red-blox/promise@1.1.1"], ["Quaternion", "sleitnick/quaternion@0.2.3"], ["Signal", "sleitnick/signal@2.0.3"], ["Spring", "sleitnick/spring@1.0.0"], ["ZonePlus", "mattschrubb/zoneplus@3.2.0"], ["ProfileStore", "lm-loleris/profilestore@1.0.3"], ["SheetValues", "boatbomber/sheetvalues@3.0.2"]]
+dependencies = [["Callback", "vtntgaming/callback@1.1.0"], ["Future", "red-blox/future@1.0.1"], ["LemonSignal", "data-oriented-house/lemonsignal@1.11.0"], ["ObjectCache", "pyseph/objectcache@1.4.6"], ["Octo", "sleitnick/octo-tree@0.3.1"], ["Promise", "red-blox/promise@1.1.1"], ["Quaternion", "sleitnick/quaternion@0.2.3"], ["RthroScaler", "egomoose/rthro-scaler@0.3.0"], ["Sift", "csqrl/sift@0.0.11"], ["Signal", "sleitnick/signal@2.0.3"], ["Spring", "sleitnick/spring@1.0.0"], ["ZonePlus", "mattschrubb/zoneplus@3.2.0"], ["ProfileStore", "lm-loleris/profilestore@1.0.3"], ["SheetValues", "boatbomber/sheetvalues@3.0.2"]]
 
 [[package]]
 name = "boatbomber/sheetvalues"
@@ -13,9 +13,24 @@ version = "3.0.2"
 dependencies = []
 
 [[package]]
-name = "elttob/fusion"
-version = "0.3.0"
+name = "csqrl/sift"
+version = "0.0.11"
 dependencies = []
+
+[[package]]
+name = "data-oriented-house/lemonsignal"
+version = "1.11.0"
+dependencies = []
+
+[[package]]
+name = "egomoose/deque"
+version = "0.2.1"
+dependencies = []
+
+[[package]]
+name = "egomoose/rthro-scaler"
+version = "0.3.0"
+dependencies = [["Deque", "egomoose/deque@0.2.1"]]
 
 [[package]]
 name = "lm-loleris/profilestore"
@@ -65,4 +80,9 @@ dependencies = []
 [[package]]
 name = "sleitnick/spring"
 version = "1.0.0"
+dependencies = []
+
+[[package]]
+name = "vtntgaming/callback"
+version = "1.1.0"
 dependencies = []
