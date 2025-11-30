@@ -41,6 +41,10 @@ local Features: YumiFeatures = {
 				Enabled = true,
 				Priority = 20,
 			},
+			["Camera"] = {
+				Enabled = true,
+				Priority = 20,
+			},
 		},
 
 		Server = {
